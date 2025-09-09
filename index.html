@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Black Text To-Do List</title>
+  <style>
+    :root {
+      --bg: linear-gradient(135deg, #6366f1, #22c55e, #0ea5e9);
+      --card-bg: rgba(255, 255, 255, 0.9);
+      --btn-bg: #f3f4f6;
+    }
+    body.light {
+      --bg: #f9fafb;
+      --card-bg: #ffffff;
+      --btn-bg: #f3f4f6;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+      color: #000;   /* 🔥 Force black text */
+      transition: all 0.3s ease;
+    }
+
+    .app {
+      width: 95%;
+      max-width: 800px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    header {
+      padding: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--btn-bg);
+    }
+
+    h1 { margin: 0; font-size: 24px; }
+    .count { font-size: 14px; color: #000; }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .input input, select, input[type="datetime-local"] {
+      padding: 10px;
+      border-radius: 12px;
+      border: none;
+      outline: none;
+      background: var(--btn-bg);
+      color: #000;  /* Black text inside input */
+      transition: 0.25s;
+    }
+
+    button {
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.25s ease;
+      color: #000;  /* 🔥 Black button text */
+    }
+    .btn-primary {
+      background: linear-gradient(90deg, #22c55e, #16a34a);
+      color: #fff; /* Primary button white text */
+    }
+    .btn-primary:hover { transform: scale(1.05); }
+    .btn-clear, .btn-theme {
+      background: var(--btn-bg);
+    }
+    .btn-clear:hover, .btn-theme:hover { opacity: 0.8; }
+
+    main { padding: 20px; }
+    ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+
+    .item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px;
+      border-radius: 14px;
+      background: var(--btn-bg);
+      transform: scale(1);
+      transition: all 0.25s ease;
+      color: #000;
+    }
+    .item:hover { transform: scale(1.02); box-shadow: 0 6px 14px rgba(0,0,0,0.2); }
+
+    .check {
+      width: 24px; height: 24px;
+      border-radius: 6px;
+      border: 2px solid #000;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      margin-right: 12px;
+      transition: 0.25s;
+      color: #000;
+    }
+    .item.completed .check {
+      background: #22c55e;
+      border-color: #22c55e;
+      color: #fff;
+      transform: rotate(360deg);
+    }
+    .title { flex: 1; }
+    .meta { font-size: 12px; color: #000; margin-top: 4px; }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .low { background: rgba(34,197,94,0.2); color: #22c55e; }
+    .med { background: rgba(234,179,8,0.2); color: #ca8a04; }
+    .high { background: rgba(239,68,68,0.2); color: #dc2626; }
+
+    .actions button {
+      padding: 6px 10px;
+      background: var(--btn-bg);
+    }
+
+    .empty { text-align: center; padding: 20px; color: #000; }
+
+    footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--btn-bg);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #000;
+    }
+    .progress {
+      flex: 1;
+      height: 12px;
+      background: var(--btn-bg);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #22c55e, #86efac);
+      transition: width 0.4s ease;
+    }
+    .progress-info { font-size: 13px; color: #000; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>My To-Do List</h1>
+        <div class="count" id="count">0 tasks</div>
+      </div>
+      <div class="controls">
+        <div class="input">
+          <input id="taskInput" type="text" placeholder="Write a task…">
+          <select id="prioritySelect">
+            <option value="low">Low</option>
+            <option value="med" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+          <input id="dueInput" type="datetime-local">
+        </div>
+        <button class="btn-primary" id="addBtn">Add</button>
+        <button class="btn-clear" id="clearCompletedBtn">Clear</button>
+      </div>
+    </header>
+
+    <main>
+      <ul id="list"></ul>
+      <div class="empty" id="emptyState">✨ No tasks yet. Add your first!</div>
+    </main>
+
+    <footer>
+      <div class="progress"><div class="bar" id="progressBar"></div></div>
+      <div class="progress-info" id="progressText">0% done</div>
+    </footer>
+  </div>
+
+  <script>
+    const listEl = document.getElementById("list");
+    const inputEl = document.getElementById("taskInput");
+    const addBtn = document.getElementById("addBtn");
+    const clearBtn = document.getElementById("clearCompletedBtn");
+    const countEl = document.getElementById("count");
+    const emptyState = document.getElementById("emptyState");
+    const prioritySelect = document.getElementById("prioritySelect");
+    const dueInput = document.getElementById("dueInput");
+    const progressBar = document.getElementById("progressBar");
+    const progressText = document.getElementById("progressText");
+
+    let tasks = [];
+
+    function render() {
+      listEl.innerHTML = "";
+      emptyState.style.display = tasks.length === 0 ? "block" : "none";
+
+      tasks.forEach(t => {
+        const li = document.createElement("li");
+        li.className = "item" + (t.completed ? " completed" : "");
+        li.innerHTML = `
+          <div class="check">${t.completed ? "✓" : ""}</div>
+          <div class="title">
+            <div><strong>${t.title}</strong></div>
+            <div class="meta">
+              ${t.due ? "Due: " + new Date(t.due).toLocaleString() : ""}
+              <span class="badge ${t.priority}">${t.priority}</span>
+            </div>
+          </div>
+          <div class="actions">
+            <button data-action="edit">✏️</button>
+            <button data-action="delete">🗑️</button>
+          </div>
+        `;
+        li.querySelector(".check").onclick = () => {
+          t.completed = !t.completed;
+          render();
+        };
+        li.querySelector("[data-action='delete']").onclick = () => {
+          tasks = tasks.filter(x => x !== t);
+          render();
+        };
+        li.querySelector("[data-action='edit']").onclick = () => {
+          const newTitle = prompt("Edit task", t.title);
+          if (newTitle) t.title = newTitle;
+          render();
+        };
+        listEl.appendChild(li);
+      });
+
+      countEl.textContent = `${tasks.length} tasks`;
+      const done = tasks.filter(x => x.completed).length;
+      const pct = tasks.length ? Math.round((done / tasks.length) * 100) : 0;
+      progressBar.style.width = pct + "%";
+      progressText.textContent = pct + "% done";
+    }
+
+    addBtn.onclick = () => {
+      if (!inputEl.value.trim()) return;
+      tasks.push({
+        title: inputEl.value.trim(),
+        priority: prioritySelect.value,
+        due: dueInput.value,
+        completed: false
+      });
+      inputEl.value = "";
+      dueInput.value = "";
+      prioritySelect.value = "med";
+      render();
+    };
+
+    clearBtn.onclick = () => {
+      tasks = tasks.filter(t => !t.completed);
+      render();
+    };
+
+    render();
+  </script>
+</body>
+</html>
